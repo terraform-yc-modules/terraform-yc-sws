@@ -2,7 +2,6 @@
 variable "name" {
   description = "Name for resources."
   type        = string
-  default     = "testy"
 }
 
 variable "folder_id" {
@@ -30,7 +29,7 @@ variable "description" {
 variable "default_action" {
   description = "Default action (ALLOW or DENY)."
   type        = string
-  default     = "ALLOW"
+  default     = "DENY"
 
   validation {
     condition     = contains(["ALLOW", "DENY"], var.default_action)
@@ -318,10 +317,7 @@ EOT
         }))
       }))
     }), null)
-
   }))
-
-  default = []
 }
 
 ## WAF
@@ -544,7 +540,7 @@ variable "advanced_rate_limiter_rules" {
           }))
         }))
       }))
-      characteristics = list(object({
+      characteristic = list(object({
         case_insensitive = optional(bool)
         simple_characteristic = optional(object({
           type = string

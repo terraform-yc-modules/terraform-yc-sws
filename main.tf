@@ -370,28 +370,27 @@ resource "yandex_sws_advanced_rate_limiter_profile" "this" {
             }
           }
 
-          # !! это сейчас не работает в провайдере!! Blocks of type "characteristics" are not expected here.
-          # dynamic "characteristics" {
-          #   for_each = dynamic_quota.value.characteristics
-          #   content {
-          #     case_insensitive = characteristics.value.case_insensitive
+          dynamic "characteristic" {
+            for_each = dynamic_quota.value.characteristic
+            content {
+              case_insensitive = characteristic.value.case_insensitive
 
-          #     dynamic "simple_characteristic" {
-          #       for_each = characteristics.value.simple_characteristic != null ? [characteristics.value.simple_characteristic] : []
-          #       content {
-          #         type = simple_characteristic.value.type
-          #       }
-          #     }
+              dynamic "simple_characteristic" {
+                for_each = characteristic.value.simple_characteristic != null ? [characteristic.value.simple_characteristic] : []
+                content {
+                  type = simple_characteristic.value.type
+                }
+              }
 
-          #     dynamic "key_characteristic" {
-          #       for_each = characteristics.value.key_characteristic != null ? [characteristics.value.key_characteristic] : []
-          #       content {
-          #         type  = key_characteristic.value.type
-          #         value = key_characteristic.value.value
-          #       }
-          #     }
-          #   }
-          # }
+              dynamic "key_characteristic" {
+                for_each = characteristic.value.key_characteristic != null ? [characteristic.value.key_characteristic] : []
+                content {
+                  type  = key_characteristic.value.type
+                  value = key_characteristic.value.value
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -406,7 +405,7 @@ resource "yandex_sws_security_profile" "this" {
   labels                           = var.labels
   description                      = var.description
   default_action                   = var.default_action
-  captcha_id                       = var.captcha_id #!!!
+  captcha_id                       = var.captcha_id
   advanced_rate_limiter_profile_id = var.arl_enabled == true ? yandex_sws_advanced_rate_limiter_profile.this[0].id : null
   depends_on                       = [yandex_sws_waf_profile.this]
 

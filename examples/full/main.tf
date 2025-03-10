@@ -77,9 +77,9 @@ module "yandex_sws" {
     "rule_set_name" : "OWASP Core Ruleset",
     "rule_set_version" : "4.0.0"
   }
-  waf_analyze_request_body = { #! не отображается сейчас в консоли
+  waf_analyze_request_body = {
     "is_enabled" : true
-    size_limit        = 512
+    size_limit        = 8
     size_limit_action = "DENY"
   }
 
