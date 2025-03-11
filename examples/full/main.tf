@@ -70,19 +70,18 @@ module "yandex_sws" {
 
   # Waf-профиль
   waf_core_rule_set = {
-    "inbound_anomaly_score" : 25,
-    "is_blocking" : false,
-    "is_enabled" : true,
-    "paranoia_level" : 3,
-    "rule_set_name" : "OWASP Core Ruleset",
-    "rule_set_version" : "4.0.0"
+    inbound_anomaly_score = 25
+    is_blocking           = false
+    is_enabled            = true
+    paranoia_level        = 1
+    rule_set_name         = "OWASP Core Ruleset"
+    rule_set_version      = "4.0.0"
   }
   waf_analyze_request_body = {
-    "is_enabled" : true
+    is_enabled        = true
     size_limit        = 8
     size_limit_action = "DENY"
   }
-
 
   # Профиль безопасности
 

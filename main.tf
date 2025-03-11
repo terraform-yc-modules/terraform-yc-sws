@@ -56,9 +56,138 @@ resource "yandex_sws_waf_profile" "this" {
       name         = exclusion_rule.value.name
       description  = lookup(exclusion_rule.value, "description", null)
       log_excluded = lookup(exclusion_rule.value, "log_excluded", null)
+      dynamic "condition" {
+        for_each = exclusion_rule.value.condition != null ? [exclusion_rule.value.condition] : []
+        content {
+          # Authority
+          dynamic "authority" {
+            for_each = condition.value.authority != null ? [condition.value.authority] : []
+            content {
+              dynamic "authorities" {
+                for_each = authority.value.authorities != null ? authority.value.authorities : []
+                content {
+                  exact_match          = authorities.value.exact_match
+                  exact_not_match      = authorities.value.exact_not_match
+                  prefix_match         = authorities.value.prefix_match
+                  prefix_not_match     = authorities.value.prefix_not_match
+                  pire_regex_match     = authorities.value.pire_regex_match
+                  pire_regex_not_match = authorities.value.pire_regex_not_match
+                }
+              }
+            }
+          }
+
+          # HTTP Method
+          dynamic "http_method" {
+            for_each = condition.value.http_method != null ? [condition.value.http_method] : []
+            content {
+              dynamic "http_methods" {
+                for_each = http_method.value.http_methods != null ? http_method.value.http_methods : []
+                content {
+                  exact_match          = http_methods.value.exact_match
+                  exact_not_match      = http_methods.value.exact_not_match
+                  prefix_match         = http_methods.value.prefix_match
+                  prefix_not_match     = http_methods.value.prefix_not_match
+                  pire_regex_match     = http_methods.value.pire_regex_match
+                  pire_regex_not_match = http_methods.value.pire_regex_not_match
+                }
+              }
+            }
+          }
+
+          # Request URI
+          dynamic "request_uri" {
+            for_each = condition.value.request_uri != null ? [condition.value.request_uri] : []
+            content {
+              dynamic "path" {
+                for_each = request_uri.value.path != null ? [request_uri.value.path] : []
+                content {
+                  exact_match          = path.value.exact_match
+                  exact_not_match      = path.value.exact_not_match
+                  prefix_match         = path.value.prefix_match
+                  prefix_not_match     = path.value.prefix_not_match
+                  pire_regex_match     = path.value.pire_regex_match
+                  pire_regex_not_match = path.value.pire_regex_not_match
+                }
+              }
+
+              dynamic "queries" {
+                for_each = request_uri.value.queries != null ? request_uri.value.queries : []
+                content {
+                  key = queries.value.key
+                  dynamic "value" {
+                    for_each = queries.value.value != null ? [queries.value.value] : []
+                    content {
+                      exact_match          = value.value.exact_match
+                      exact_not_match      = value.value.exact_not_match
+                      prefix_match         = value.value.prefix_match
+                      prefix_not_match     = value.value.prefix_not_match
+                      pire_regex_match     = value.value.pire_regex_match
+                      pire_regex_not_match = value.value.pire_regex_not_match
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          # Headers
+          dynamic "headers" {
+            for_each = condition.value.headers != null ? condition.value.headers : []
+            content {
+              name = headers.value.name
+              dynamic "value" {
+                for_each = headers.value.value != null ? [headers.value.value] : []
+                content {
+                  exact_match          = value.value.exact_match
+                  exact_not_match      = value.value.exact_not_match
+                  prefix_match         = value.value.prefix_match
+                  prefix_not_match     = value.value.prefix_not_match
+                  pire_regex_match     = value.value.pire_regex_match
+                  pire_regex_not_match = value.value.pire_regex_not_match
+                }
+              }
+            }
+          }
+
+          # Source IP
+          dynamic "source_ip" {
+            for_each = condition.value.source_ip != null ? [condition.value.source_ip] : []
+            content {
+              dynamic "ip_ranges_match" {
+                for_each = source_ip.value.ip_ranges_match != null ? [source_ip.value.ip_ranges_match] : []
+                content {
+                  ip_ranges = ip_ranges_match.value.ip_ranges
+                }
+              }
+
+              dynamic "ip_ranges_not_match" {
+                for_each = source_ip.value.ip_ranges_not_match != null ? [source_ip.value.ip_ranges_not_match] : []
+                content {
+                  ip_ranges = ip_ranges_not_match.value.ip_ranges
+                }
+              }
+
+              dynamic "geo_ip_match" {
+                for_each = source_ip.value.geo_ip_match != null ? [source_ip.value.geo_ip_match] : []
+                content {
+                  locations = geo_ip_match.value.locations
+                }
+              }
+
+              dynamic "geo_ip_not_match" {
+                for_each = source_ip.value.geo_ip_not_match != null ? [source_ip.value.geo_ip_not_match] : []
+                content {
+                  locations = geo_ip_not_match.value.locations
+                }
+              }
+            }
+          }
+        }
+      }
 
       dynamic "exclude_rules" {
-        for_each = exclusion_rule.value.exclude_rules != null ? [1] : []
+        for_each = exclusion_rule.value.exclude_rules != null ? [exclusion_rule.value.exclude_rules] : []
         content {
           exclude_all = exclusion_rule.value.exclude_rules.exclude_all
           rule_ids    = exclusion_rule.value.exclude_rules.rule_ids
@@ -414,6 +543,7 @@ resource "yandex_sws_security_profile" "this" {
     content {
       name     = security_rule.value.name
       priority = security_rule.value.priority
+      dry_run  = security_rule.value.dry_run
 
       dynamic "smart_protection" {
         for_each = security_rule.value.smart_protection != null ? [security_rule.value.smart_protection] : []

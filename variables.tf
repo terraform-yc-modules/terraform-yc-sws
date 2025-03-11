@@ -50,7 +50,7 @@ List of security rules for the Security Profile resource.
 Each rule object supports:
 
 - name (string, required): Name of the security rule.
-- priority (number, required): Priority of the rule. Higher priority rules processed earlier.
+- priority (number, required): Priority of the rule. The smaller the value, the higher is the rule priority.
 
 Exactly one of the following blocks may be specified per rule:
 
@@ -60,7 +60,6 @@ Exactly one of the following blocks may be specified per rule:
 
 2. waf block (optional):
     - mode (string, required): WAF mode. Possible values: "FULL", "API".
-    - waf_profile_id (string, required): Associated WAF profile ID.
     - condition block (optional): Conditions when WAF rules are applied (see detailed structure below).
 
 3. rule_condition block (optional):
@@ -101,6 +100,7 @@ EOT
   type = list(object({
     name     = string
     priority = number
+    dry_run  = optional(bool)
 
     smart_protection = optional(object({
       mode = string
@@ -358,6 +358,74 @@ variable "waf_exclusion_rules" {
     name         = string
     description  = optional(string)
     log_excluded = optional(bool)
+    condition = optional(object({
+      authority = optional(object({
+        authorities = list(object({
+          exact_match          = optional(string)
+          exact_not_match      = optional(string)
+          prefix_match         = optional(string)
+          prefix_not_match     = optional(string)
+          pire_regex_match     = optional(string)
+          pire_regex_not_match = optional(string)
+        }))
+      }))
+      http_method = optional(object({
+        http_methods = list(object({
+          exact_match          = optional(string)
+          exact_not_match      = optional(string)
+          prefix_match         = optional(string)
+          prefix_not_match     = optional(string)
+          pire_regex_match     = optional(string)
+          pire_regex_not_match = optional(string)
+        }))
+      }))
+      request_uri = optional(object({
+        path = optional(object({
+          exact_match          = optional(string)
+          exact_not_match      = optional(string)
+          prefix_match         = optional(string)
+          prefix_not_match     = optional(string)
+          pire_regex_match     = optional(string)
+          pire_regex_not_match = optional(string)
+        }))
+        queries = optional(list(object({
+          key = string
+          value = optional(object({
+            exact_match          = optional(string)
+            exact_not_match      = optional(string)
+            prefix_match         = optional(string)
+            prefix_not_match     = optional(string)
+            pire_regex_match     = optional(string)
+            pire_regex_not_match = optional(string)
+          }))
+        })))
+      }))
+      headers = optional(list(object({
+        name = string
+        value = optional(object({
+          exact_match          = optional(string)
+          exact_not_match      = optional(string)
+          prefix_match         = optional(string)
+          prefix_not_match     = optional(string)
+          pire_regex_match     = optional(string)
+          pire_regex_not_match = optional(string)
+        }))
+      })))
+      source_ip = optional(object({
+        ip_ranges_match = optional(object({
+          ip_ranges = list(string)
+        }))
+        ip_ranges_not_match = optional(object({
+          ip_ranges = list(string)
+        }))
+        geo_ip_match = optional(object({
+          locations = list(string)
+        }))
+        geo_ip_not_match = optional(object({
+          locations = list(string)
+        }))
+      }))
+    }))
     exclude_rules = optional(object({
       exclude_all = optional(bool)
       rule_ids    = optional(list(string))
